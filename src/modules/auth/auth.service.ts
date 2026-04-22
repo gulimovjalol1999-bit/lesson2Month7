@@ -122,7 +122,7 @@ export class AuthService {
 
     const payload = {
       username: foundedUser.username,
-      RolesUser: foundedUser.role,
+      role: foundedUser.role,
     };
 
     return {

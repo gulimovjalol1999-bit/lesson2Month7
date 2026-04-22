@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
-    forbidNonWhitelisted: true,
+    // forbidNonWhitelisted: true,
     whitelist: true
   }))
 
@@ -17,13 +17,28 @@ async function bootstrap() {
   .setTitle("Article project")
   .setDescription("Article project for lesson")
   .setVersion("1.0.0")
+  .addBearerAuth(
+    {
+      type: "http",
+      scheme: "bearer",
+      bearerFormat: "JWT",
+      name: "JWT",
+      description: "Enteer JWT token",
+      in: "header",
+    },
+    "JWT-auth", // Bu nom guardlarda ishlatiladi
+  )
   .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("api-docs", app, document)
+  SwaggerModule.setup("api-docs", app, document, {
+    swaggerOptions: {
+      persistAuthorization: true
+    }
+  })
 
   app.use("/uploads", express.static("uploads"))
-
+ 
   const PORT = process.env.PORT ?? 3000;
   await app.listen(PORT, () => {
     console.log(`Root api for project: http://localhost:${PORT}`);
