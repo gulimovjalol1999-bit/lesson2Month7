@@ -10,6 +10,6 @@ export abstract class BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @DeleteDateColumn()
-  deletedAt!: Date;
+  // @DeleteDateColumn()
+  // deletedAt!: Date;
 }

@@ -5,6 +5,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Auth } from "./modules/auth/entities/auth.entity";
 import { ArticleModule } from "./modules/article/article.module";
 import { Article } from "./modules/article/entities/article.entity";
+import { Tag } from "./modules/tag/entities/tag.entity";
+import { TagModule } from "./modules/tag/tag.module";
 
 @Module({
   imports: [
@@ -16,13 +18,14 @@ import { Article } from "./modules/article/entities/article.entity";
       username: "postgres",
       database: String(process.env.DB_NAME as string),
       password: String(process.env.DB_PASSWORD as string), 
-      entities: [Auth, Article],
+      entities: [Auth, Article, Tag],
       // autoLoadEntities: true,
       synchronize: true,
       logging: false,
     }),
     AuthModule,
     ArticleModule,
+    TagModule
   ],
   controllers: [],
   providers: [],

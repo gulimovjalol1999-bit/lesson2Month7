@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
   UseGuards,
+  Req,
 } from "@nestjs/common";
 import { ArticleService } from "./article.service";
 import { CreateArticleDto } from "./dto/create-article.dto";
@@ -41,7 +42,7 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RolesUser.ADMIN, RolesUser.USER)
+  @Roles(RolesUser.ADMIN, RolesUser.SUPERADMIN, RolesUser.USER)
   @ApiOkResponse({ description: "Created" })
   @Post()
   @ApiConsumes("multipart/form-data")
@@ -71,8 +72,9 @@ export class ArticleController {
   create(
     @Body() createArticleDto: CreateArticleFileDto,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req 
   ) {
-    return this.articleService.create(createArticleDto, file);
+    return this.articleService.create(createArticleDto, file, req.user.id);
   }
  
   @ApiNotFoundResponse({ description: "Article not found" })
@@ -104,7 +106,7 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RolesUser.ADMIN, RolesUser.SUPERADMIN)
+  @Roles(RolesUser.ADMIN, RolesUser.SUPERADMIN, RolesUser.USER)
   @ApiOkResponse({ description: "Deleted" })
   @ApiNotFoundResponse({ description: "Article not found" })
   @HttpCode(200)
