@@ -5,6 +5,7 @@ import { Article } from './entities/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Tag } from '../tag/entities/tag.entity';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class ArticleService {
@@ -28,14 +29,40 @@ export class ArticleService {
     return await this.articleRepo.save(article)
   }
 
-  async findAll(): Promise<Article[]> {
-    return await this.articleRepo.find();
+  async findAll(queryDto: QueryDto) {
+    const {page = 1, limit = 10, search} = queryDto
+
+    const queryBuilder = this.articleRepo.createQueryBuilder("article")
+    .leftJoinAndSelect("article.tags", "tags")
+    .where("article.deletedAt is null")
+
+    if (search) {
+      queryBuilder.andWhere(
+        "article.title ILIKE :search or article.content ILIKE :search or tags.name ILIKE :search", 
+      {search: `%${search}%`})
+    }
+
+    const result = await queryBuilder
+    .orderBy("article.createdAt", "DESC")
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getMany()
+
+    const total = await queryBuilder.getCount()
+    const totalPage = Math.ceil(total / limit)
+
+    return {
+      totalPage,
+      prev: page > 1 ? {page: page - 1, limit} : undefined,
+      next: page < totalPage ? {page: page + 1, limit} : undefined,
+      result, 
+    }
   }
 
   async findOne(id: number): Promise<Article>  {
     const foundedArticle = await this.articleRepo.findOne({
       where: {id},
-      relations: ['author', 'tags']
+      relations: ['author', 'tags', 'images']
     }) 
     if(!foundedArticle) throw new NotFoundException("article not found")
     return foundedArticle;
